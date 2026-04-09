@@ -7,18 +7,34 @@ Automatically check reimbursement applications and procurement requests via pano
 ## Features
 
 - **Automated Login** - Chrome browser automation with auto-fill credentials
-- **Incremental Checking** - Only tracks pending applications, skips completed ones
+- **Full & Incremental Modes** - First run scans all applications; subsequent runs only check pending ones
 - **Panoramic View Extraction** - Reads approval flowchart data from SVG nodes
 - **Smart Comparison** - Detects status changes between checks
 - **WeChat Work Notification** - Pushes results via enterprise webhook
 - **New Application Detection** - Automatically picks up new entries from lists
+- **Baseline Auto-Management** - Completed items removed, new items added automatically
+
+## Quick Start
+
+> **New user?** Follow the complete [SETUP.md](SETUP.md) guide for step-by-step installation.
+
+### 30-Second Summary
+
+1. Install [opencli CLI](https://github.com/nicepkg/opencli) and connect to Chrome
+2. Install [opencli-operate](https://github.com/nicepkg/opencli) skill in WorkBuddy
+3. Copy `SKILL/` folder to `~/.workbuddy/skills/77hub-approval-tracker/`
+4. Tell WorkBuddy: "77hub检查，首次运行"
 
 ## Prerequisites
 
-- [WorkBuddy](https://www.codebuddy.cn/) with AI agent capabilities
-- [opencli-operate](https://github.com/nicepkg/opencli) skill installed
-- Google Chrome with 77hub login session saved
-- (Optional) WeChat Work robot webhook URL for notifications
+| Dependency | Purpose | Install |
+|-----------|---------|---------|
+| [WorkBuddy](https://www.codebuddy.cn/) | AI agent platform | Download and install |
+| [opencli CLI](https://github.com/nicepkg/opencli) | Browser automation engine | `uvx opencli install` |
+| opencli-operate skill | AI knowledge for opencli commands | Install via WorkBuddy Skills panel |
+| Google Chrome | Browser controlled by opencli | Install + enable opencli extension |
+| 77hub account | Platform access | Login once and save credentials in Chrome |
+| WeChat Work (optional) | Push notifications | Create a group robot for webhook URL |
 
 ## Installation
 
@@ -35,25 +51,21 @@ Automatically check reimbursement applications and procurement requests via pano
 
 ## Configuration
 
-### Required Setup
+### First Run
 
-Before first use, configure these in your workspace's `MEMORY.md`:
+No configuration needed! Just tell WorkBuddy to run a first check:
+> "帮我检查 77hub 的审批进度，这是第一次检查"
 
-```markdown
-## 定时检查任务
+The skill will automatically:
+- Scan all applications in both lists
+- Open panoramic views for each application
+- Create a baseline in your workspace's `MEMORY.md`
 
-- **费用申请单待跟踪**（{日期} 基线）：
-  - 单号（状态，金额）
-- **非物资采购待跟踪**（{日期} 基线）：
-  - 单号（状态，金额）
-- **已完成不需要复查**
-```
+### WeChat Work Webhook (Optional)
 
-### WeChat Work Webhook
+To enable push notifications, create a robot in your WeChat Work group and copy the webhook URL (format: `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx`).
 
-To enable push notifications, provide a webhook URL when the skill asks, or set it in the automation prompt.
-
-Create a robot in your WeChat Work group and copy the webhook URL (format: `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx`).
+See [SETUP.md](SETUP.md#step-6-set-up-wechat-work-robot-optional-but-recommended) for detailed instructions.
 
 ## Usage
 
@@ -78,44 +90,29 @@ Set up a recurring WorkBuddy automation:
 | Daily 9:00 | `FREQ=DAILY;BYHOUR=9;BYMINUTE=0` |
 | Weekly Monday 10:00 | `FREQ=WEEKLY;BYDAY=MO;BYHOUR=10;BYMINUTE=0` |
 
+See [SETUP.md](SETUP.md#step-8-set-up-scheduled-automation-optional) for the complete automation prompt template.
+
 ## Project Structure
 
 ```
-SKILL/
-├── SKILL.md                    # Core workflow (7-step SOP)
-├── references/
-│   └── platform-guide.md       # 77hub technical reference
-└── scripts/
-    └── wecom-notify.ps1        # WeChat Work notification script
+├── README.md                   # This file
+├── SETUP.md                    # Complete installation guide (for humans)
+├── .gitignore
+└── SKILL/
+    ├── SKILL.md                # Core workflow (8-step SOP, for AI agent)
+    ├── references/
+    │   └── platform-guide.md   # 77hub technical reference
+    └── scripts/
+        └── wecom-notify.ps1    # WeChat Work notification script
 ```
 
-### SKILL.md
-
-The main skill definition containing the complete 7-step workflow:
-1. Login to 77hub
-2. Check expense applications
-3. Check procurement applications
-4. View panoramic views
-5. Analyze status changes
-6. Generate report and notify
-7. Update baseline
-
-### platform-guide.md
-
-Technical reference for the 77hub platform:
-- URL patterns and routing
-- Application number prefix codes
-- Data extraction JavaScript snippets
-- SPA cache workarounds
-- PowerShell quoting issues and solutions
-
-### wecom-notify.ps1
-
-Reusable PowerShell script for sending WeChat Work notifications:
-
-```powershell
-.\wecom-notify.ps1 -WebhookUrl "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx" -Content "Message content"
-```
+| File | Audience | Description |
+|------|----------|-------------|
+| `README.md` | Everyone | Overview, quick start, features |
+| `SETUP.md` | Humans | Step-by-step installation from zero |
+| `SKILL.md` | AI Agent | Complete workflow SOP with code snippets |
+| `platform-guide.md` | AI Agent | Platform-specific technical reference |
+| `wecom-notify.ps1` | PowerShell | Reusable notification sending script |
 
 ## Supported Application Types
 
@@ -139,6 +136,10 @@ Reusable PowerShell script for sending WeChat Work notifications:
 - 77hub SPA cache requires `location.reload()` after navigating to panoramic views
 - Session expires after inactivity, re-login may be needed
 - WeChat Work message size limit: 2048 bytes per message
+
+## Troubleshooting
+
+See [SETUP.md - Troubleshooting](SETUP.md#troubleshooting) for common issues and fixes.
 
 ## License
 
